@@ -64,12 +64,10 @@ bool NetvarDecompressor::Load(CreateInterfaceFn interfaceFactory, CreateInterfac
 		for (int i = 0; i < numProps; i++)
 		{
 			SendProp *prop = table->GetProp(i);
-			Msg("\x1b[32mProp Name = %s\n", prop->GetName());
-			prop->m_nBits = ??;
-			prop->SetFlags(??);
+			Msg("\x1b[94mProp Name = %s\n", prop->GetName());
 		}
+		sc = sc->m_pNext;
 	}
-	sc = sc->m_pNext;
 
 	return true;
 }
