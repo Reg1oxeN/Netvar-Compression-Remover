@@ -1,6 +1,7 @@
 #include "eiface.h"
 #include "server_class.h"
 #include "dt_common.h"
+#include "iostream"
 
 class NetvarDecompressor : public IServerPluginCallbacks
 {
@@ -50,8 +51,8 @@ void CorrectProps(SendTable *table) {
 	int numProps = table->GetNumProps();
 	for (int i = 0; i < numProps; i++) {
 		SendProp* prop = table->GetProp(i);
-		if (prop->GetDataTable() && prop.GetNumElements() > 0) {
-			if (std::string(prop.m_var_name).substr(0, 1) == std::string("0"))
+		if (prop->GetDataTable() && prop->GetNumElements() > 0) {
+			if (std::string(prop->GetName()).substr(0, 1) == std::string("0"))
 				continue;
 			CorrectProps(prop->GetDataTable());
 		}
