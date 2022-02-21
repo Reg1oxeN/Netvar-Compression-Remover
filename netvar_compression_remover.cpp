@@ -1,6 +1,7 @@
 #include "eiface.h"
 #include "server_class.h"
 #include "dt_common.h"
+#include "iostream"
 
 class NetvarDecompressor : public IServerPluginCallbacks
 {
@@ -46,6 +47,34 @@ const char *NetvarDecompressor::GetPluginDescription(void)
 	return "Netvar compression remover by brooks";
 }
 
+void CorrectProps(SendTable *table) {
+	int numProps = table->GetNumProps();
+	for (int i = 0; i < numProps; i++) {
+		SendProp* prop = table->GetProp(i);
+		if (prop->GetDataTable() && prop->GetNumElements() > 0) {
+			if (std::string(prop->GetName()).substr(0, 1) == std::string("0"))
+				continue;
+			CorrectProps(prop->GetDataTable());
+		}
+
+		auto flags = prop->GetFlags();
+		if (flags & SPROP_COORD) { // COORD is used for vectors and angles, converts the decimal part down to 5bit and integer down to 11bit iirc
+			flags &= ~SPROP_COORD;
+			prop->SetFlags(flags);
+		}
+		switch (prop->GetType()) {
+		FPT_Int:
+		FPT_Float:
+			if (prop->m_nBits != 32) { // floats and integers are 32bit
+				prop->m_nBits = 32;
+				Msg("\x1b[94mProp %s fixed\n", prop->GetName());
+			}
+
+			break;
+		}
+	}
+}
+
 bool NetvarDecompressor::Load(CreateInterfaceFn interfaceFactory, CreateInterfaceFn gameServerFactory)
 {
 	gamedll = (IServerGameDLL *)gameServerFactory("ServerGameDLL005", NULL);
@@ -59,27 +88,7 @@ bool NetvarDecompressor::Load(CreateInterfaceFn interfaceFactory, CreateInterfac
 	while (sc)
 	{
 		SendTable *table = sc->m_pTable;
-		int numProps = table->GetNumProps();
-		for (int i = 0; i < numProps; i++)
-		{
-			SendProp *prop = table->GetProp(i);
-			auto flags = prop->GetFlags();
-			if (flags & SPROP_COORD) { // COORD is used for vectors and angles, converts the decimal part down to 5bit and integer down to 11bit iirc
-				flags &= ~SPROP_COORD;
-				flags |= SPROP_NOSCALE;
-  				prop->SetFlags(flags);
-			}
-			switch (prop->GetType()) {
-			FPT_Int:
-			FPT_Float:
-				if (prop->m_nBits != 32) { // floats and integers are 32bit
-					prop->m_nBits = 32;
-					Msg("\x1b[94mProp %s fixed\n", prop->GetName());
-				}
-
-				break;
-			}
-		}
+		CorrectProps(table);
 		sc = sc->m_pNext;
 	}
 
