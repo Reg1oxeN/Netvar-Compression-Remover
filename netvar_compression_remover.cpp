@@ -58,13 +58,26 @@ bool NetvarDecompressor::Load(CreateInterfaceFn interfaceFactory, CreateInterfac
 	ServerClass *sc = gamedll->GetAllServerClasses();
 	while (sc)
 	{
-		Msg("\x1b[32mTable Name = %s\n", sc->GetName());
 		SendTable *table = sc->m_pTable;
 		int numProps = table->GetNumProps();
 		for (int i = 0; i < numProps; i++)
 		{
 			SendProp *prop = table->GetProp(i);
-			Msg("\x1b[94mProp Name = %s\n", prop->GetName());
+			auto flags = prop->GetFlags()
+			if (flags & SPROP_COORD) { // COORD is used for vectors and angles, converts the decimal part down to 5bit and integer down to 11bit iirc
+				flags &= ~SPROP_COORD;
+  				prop->SetFlags(flags);
+			}
+			switch (prop->GetType()) {
+			FPT_Int:
+			FPT_Float:
+				if (prop->m_nBits != 32) { // floats and integers are 32bit
+					prop->m_nBits = 32;
+					Msg("\x1b[94mProp %s fixed\n", prop->GetName());
+				}
+
+				break;
+			}
 		}
 		sc = sc->m_pNext;
 	}
