@@ -64,8 +64,8 @@ void CorrectProps(SendTable *table) {
 			prop->SetFlags(flags);
 		}
 		switch (prop->GetType()) {
-		FPT_Int:
-		FPT_Float:
+		DPT_Int:
+		DPT_Float:
 			if (prop->m_nBits != 32) { // floats and integers are 32bit
 				prop->m_nBits = 32;
 				Msg("\x1b[94mProp %s fixed\n", prop->GetName());
