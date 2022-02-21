@@ -65,6 +65,18 @@ bool NetvarDecompressor::Load(CreateInterfaceFn interfaceFactory, CreateInterfac
 		{
 			SendProp *prop = table->GetProp(i);
 			Msg("\x1b[94mProp Name = %s\n", prop->GetName());
+			if (prop->flag & SPROP_COORD) // COORD is used for vectors and angles, converts the decimal part down to 5bit and integer down to 11bit iirc
+				prop->flag &= ~SPROP_COORD;
+			switch (prop->type) {
+			FEILD_INTEGER:
+			FEILD_FLOAT:
+				if (prop->bits != 32) { // floats and integers are 32bit
+					prop->bits = 32;
+					Msg("\x1b[94mProp %s fixed\n", prop->GetName());
+				}
+
+				break;
+			}
 		}
 		sc = sc->m_pNext;
 	}
