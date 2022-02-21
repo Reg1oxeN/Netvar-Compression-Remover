@@ -64,14 +64,13 @@ void CorrectProps(SendTable *table) {
 			prop->SetFlags(flags);
 		}
 		switch (prop->GetType()) {
-		DPT_Int:
-		DPT_Float:
-			if (prop->m_nBits != 32) { // floats and integers are 32bit
-				prop->m_nBits = 32;
-				Msg("\x1b[94mProp %s fixed\n", prop->GetName());
-			}
-
-			break;
+			case DPT_Int:
+			case DPT_Float:
+				if (prop->m_nBits != 32) { // floats and integers are 32bit
+					prop->m_nBits = 32;
+					Msg("\x1b[94mProp %s fixed\n", prop->GetName());
+				}
+				break;
 		}
 	}
 }
