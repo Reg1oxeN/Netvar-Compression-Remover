@@ -58,11 +58,10 @@ void CorrectProps(SendTable *table) {
 		}
 
 		auto flags = prop->GetFlags();
-		if (flags & SPROP_COORD) { // COORD is used for vectors and angles, converts the decimal part down to 5bit and integer down to 11bit iirc
+		if (flags & SPROP_COORD) // COORD is used for vectors and angles, converts the decimal part down to 5bit and integer down to 11bit iirc
 			flags &= ~SPROP_COORD;
-			flags |= SPROP_NOSCALE;
-			prop->SetFlags(flags);
-		}
+		flags |= SPROP_NOSCALE;
+		prop->SetFlags(flags);
 		switch (prop->GetType()) {
 			case DPT_Int:
 			case DPT_Float:
