@@ -44,7 +44,7 @@ IServerGameDLL *gamedll = NULL;
 
 const char *NetvarDecompressor::GetPluginDescription(void)
 {
-	return "Netvar compression remover by brooks";
+	return "Netvar compression remover by brooks + emily";
 }
 
 void CorrectProps(SendTable *table) {
