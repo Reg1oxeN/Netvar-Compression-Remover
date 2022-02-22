@@ -47,11 +47,20 @@ const char *NetvarDecompressor::GetPluginDescription(void)
 	return "Netvar compression remover by brooks + emily";
 }
 
-void CorrectProps(SendTable *table) {
+void PlayerFlagBitsPatch(const SendProp *pProp, const void *pStruct, const void *pVarData, DVariant *pOut, int iElement, int objectID)
+{
+        int data = *(int *)pVarData;
+        pOut->m_Int = (data);
+}
+
+void CorrectProps(SendTable *table) 
+{
 	int numProps = table->GetNumProps();
-	for (int i = 0; i < numProps; i++) {
+	for (int i = 0; i < numProps; i++) 
+	{
 		SendProp* prop = table->GetProp(i);
-		if (prop->GetDataTable() && prop->GetNumElements() > 0) {
+		if (prop->GetDataTable() && prop->GetNumElements() > 0) 
+		{
 			if (std::string(prop->GetName()).substr(0, 1) == std::string("0"))
 				continue;
 			CorrectProps(prop->GetDataTable());
@@ -62,15 +71,16 @@ void CorrectProps(SendTable *table) {
 			flags &= ~SPROP_COORD;
 		flags |= SPROP_NOSCALE;
 		prop->SetFlags(flags);
-		switch (prop->GetType()) {
+		switch (prop->GetType()) 
+		{
 			case DPT_Int:
 			case DPT_Float:
-				if (prop->m_nBits != 32) { // floats and integers are 32bit
+				if (prop->m_nBits != 32) // floats and integers are 32bit
 					prop->m_nBits = 32;
-					Msg("\x1b[94mProp %s fixed\n", prop->GetName());
-				}
 				break;
 		}
+		if (V_stricmp(prop->GetName(), "m_fFlags") == 0)
+                        prop->SetProxyFn(PlayerFlagBitsPatch);
 	}
 }
 
