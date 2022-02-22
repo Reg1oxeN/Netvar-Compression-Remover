@@ -92,7 +92,10 @@ bool NetvarDecompressor::Load(CreateInterfaceFn interfaceFactory, CreateInterfac
 		Warning("Failed to get a pointer on ServerGameDLL.\n");
 		return false;
 	}
-
+	
+	static ConVar* sv_sendtables = cvar->FindVar("sv_sendtables");
+        sv_sendtables->SetValue(2);
+	
 	ServerClass *sc = gamedll->GetAllServerClasses();
 	while (sc)
 	{
