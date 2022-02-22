@@ -86,14 +86,10 @@ void CorrectProps(SendTable *table)
 
 bool NetvarDecompressor::Load(CreateInterfaceFn interfaceFactory, CreateInterfaceFn gameServerFactory)
 {
-	gamedll = (IServerGameDLL *)gameServerFactory("ServerGameDLL005", NULL);
-	if (!gamedll)
-	{
-		Warning("Failed to get a pointer on ServerGameDLL.\n");
-		return false;
-	}
+	gamedll = (IServerGameDLL *)gameServerFactory(INTERFACEVERSION_SERVERGAMEDLL, NULL);
+	g_pCVar = (ICvar *)interfaceFactory(CVAR_INTERFACE_VERSION, NULL);
 	
-	static ConVar* sv_sendtables = cvar->FindVar("sv_sendtables");
+	static ConVar* sv_sendtables = g_pCVar->FindVar("sv_sendtables");
         sv_sendtables->SetValue(2);
 	
 	ServerClass *sc = gamedll->GetAllServerClasses();
