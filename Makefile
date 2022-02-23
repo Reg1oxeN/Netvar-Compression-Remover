@@ -21,7 +21,7 @@ INCLUDES=-I$(HL2SDK)/public -I$(HL2SDK)/public/tier0 -I$(HL2SDK)/public/tier1
 # Include the folder with the Source SDK libraries
 LINKFLAGS=-shared -m32 -L$(HL2SDK)/lib/linux
 
-all: netvar_compression_remover.o netvar_compression_remover.so
+all: clean netvar_compression_remover.o netvar_compression_remover.so
 
 netvar_compression_remover.o:
 	$(CXX) $(CFLAGS) $(OPTFLAGS) $(INCLUDES) -c netvar_compression_remover.cpp
