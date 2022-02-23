@@ -1,6 +1,6 @@
 #include "eiface.h"
 #include "server_class.h"
-#include "dt_common.h"
+#include "dt_send.h"
 #include "iostream"
 
 class NetvarDecompressor : public IServerPluginCallbacks
@@ -44,22 +44,16 @@ IServerGameDLL *gamedll = NULL;
 
 const char *NetvarDecompressor::GetPluginDescription(void)
 {
-	return "Netvar compression remover by brooks + emily";
+	return "Netvar compression remover by brooks + emily (ideas from xutaxkamay)";
 }
 
-void PlayerFlagBitsPatch(const SendProp *pProp, const void *pStruct, const void *pVarData, DVariant *pOut, int iElement, int objectID)
-{
-        int data = *(int *)pVarData;
-        pOut->m_Int = (data);
-}
-
-void CorrectProps(SendTable *table) 
+void CorrectProps(SendTable *table)
 {
 	int numProps = table->GetNumProps();
-	for (int i = 0; i < numProps; i++) 
+	for (int i = 0; i < numProps; i++)
 	{
 		SendProp* prop = table->GetProp(i);
-		if (prop->GetDataTable() && prop->GetNumElements() > 0) 
+		if (prop->GetDataTable() && prop->GetNumElements() > 0)
 		{
 			if (std::string(prop->GetName()).substr(0, 1) == std::string("0"))
 				continue;
@@ -69,18 +63,26 @@ void CorrectProps(SendTable *table)
 		auto flags = prop->GetFlags();
 		if (flags & SPROP_COORD) // COORD is used for vectors and angles, converts the decimal part down to 5bit and integer down to 11bit iirc
 			flags &= ~SPROP_COORD;
+		if (flags & SPROP_ENCODED_AGAINST_TICKCOUNT)
+			flags &= ~SPROP_ENCODED_AGAINST_TICKCOUNT;
 		flags |= SPROP_NOSCALE;
 		prop->SetFlags(flags);
-		switch (prop->GetType()) 
+		CStandardSendProxies *sendproxies = gamedll->GetStandardSendProxies();
+		switch (prop->GetType())
 		{
 			case DPT_Int:
+				if (prop->m_nBits != 32)
+					prop->m_nBits = 32;
+				if (prop->GetProxyFn() != sendproxies->m_Int8ToInt32)
+					prop->SetProxyFn(sendproxies->m_Int8ToInt32);
+				break;
 			case DPT_Float:
 				if (prop->m_nBits != 32) // floats and integers are 32bit
 					prop->m_nBits = 32;
+				if (prop->GetProxyFn() != sendproxies->m_FloatToFloat)
+					prop->SetProxyFn(sendproxies->m_FloatToFloat);
 				break;
 		}
-		if (V_stricmp(prop->GetName(), "m_fFlags") == 0)
-                        prop->SetProxyFn(PlayerFlagBitsPatch);
 	}
 }
 
@@ -98,10 +100,10 @@ bool NetvarDecompressor::Load(CreateInterfaceFn interfaceFactory, CreateInterfac
 		Warning("Failed to get a pointer on ICvar.\n");
 		return false;
 	}
-	
+
 	static ConVar* sv_sendtables = g_pCVar->FindVar("sv_sendtables");
         sv_sendtables->SetValue(2);
-	
+
 	ServerClass *sc = gamedll->GetAllServerClasses();
 	while (sc)
 	{
