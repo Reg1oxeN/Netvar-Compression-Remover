@@ -67,6 +67,7 @@ void CorrectProps(SendTable *table)
 			flags &= ~SPROP_ENCODED_AGAINST_TICKCOUNT;
 		flags |= SPROP_NOSCALE;
 		prop->SetFlags(flags);
+		CStandardSendProxies *sendproxies = gamedll->GetStandardSendProxies();
 		switch (prop->GetType())
 		{
 			case DPT_Int:
@@ -82,12 +83,8 @@ void CorrectProps(SendTable *table)
 					prop->SetProxyFn(sendproxies->m_FloatToFloat);
 				break;
 		}
-		CStandardSendProxies *sendproxies = gamedll->GetStandardSendProxies();
 		if (V_stricmp(prop->GetName(), "m_fFlags") == 0)
-		{
-			CStandardSendProxies *sendproxies = gamedll->GetStandardSendProxies();
                         prop->SetProxyFn(sendproxies->m_Int32ToInt32);
-		}
 	}
 }
 
