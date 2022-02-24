@@ -71,16 +71,9 @@ void CorrectProps(SendTable *table)
 		switch (prop->GetType())
 		{
 			case DPT_Int:
-				if (prop->m_nBits != 32)
-					prop->m_nBits = 32;
-				if (prop->GetProxyFn() != sendproxies->m_Int8ToInt32)
-					prop->SetProxyFn(sendproxies->m_Int8ToInt32);
-				break;
 			case DPT_Float:
 				if (prop->m_nBits != 32) // floats and integers are 32bit
 					prop->m_nBits = 32;
-				if (prop->GetProxyFn() != sendproxies->m_FloatToFloat)
-					prop->SetProxyFn(sendproxies->m_FloatToFloat);
 				break;
 		}
 		if (V_stricmp(prop->GetName(), "m_fFlags") == 0)
