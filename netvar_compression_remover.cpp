@@ -72,6 +72,9 @@ void CorrectProps(SendTable *table)
 		{
 			case DPT_Int:
 			case DPT_Float:
+				if (std::string(prop->GetName()).substr(0, 3) != std::string("m_f") && std::string(prop->GetName()).substr(0, 3) != std::string("m_i")
+				 && std::string(prop->GetName()).substr(0, 5) != std::string("m_vec") && std::string(prop->GetName()).substr(0, 5) != std::string("m_ang"))
+					break;
 				if (prop->m_nBits != 32) // floats and integers are 32bit
 					prop->m_nBits = 32;
 				break;
